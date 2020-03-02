@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const { URLSearchParams } = require('url');
+const { v4: uuidv4 } = require('uuid');
 
 const { constantsConfig } = require('../config');
 
@@ -28,6 +29,7 @@ const getSourceById = async ({ sourceId, page = 1 }) => {
     params.append('apiKey', constantsConfig.apiKey);
     params.append('sources', sourceId);
     params.append('page', page);
+    params.append('pageSize', 10);
 
     const response = await fetch(`${constantsConfig.baseUrl}/everything?${params}`);
     const data = await response.json();
@@ -36,7 +38,10 @@ const getSourceById = async ({ sourceId, page = 1 }) => {
       throw data;
     }
 
-    return data;
+    return {
+      ...data,
+      articles: data.articles.map((article) => ({ ...article, id: uuidv4() })),
+    };
   } catch (error) {
     throw new Error(error.message);
   }
